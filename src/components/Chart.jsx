@@ -6,9 +6,7 @@ const Chart = ({ dataProp }) => {
 	const tooltipRef = useRef();
 	const [data, setData] = useState(null);
 
-	// Update data when the prop changes
 	useEffect(() => {
-		console.log(dataProp)
 		if (!dataProp || !dataProp.xAxisLabels) {
 			console.error('Data not loaded or invalid:', dataProp);
 			return;
@@ -19,20 +17,24 @@ const Chart = ({ dataProp }) => {
 	useEffect(() => {
 		if (!data) return;
 
-		const width = 800,
-			height = 500,
+		const width = 900,
+			height = 600,
 			margin = { top: 20, right: 30, bottom: 50, left: 50 };
+
+		let filteredKeys = data.keys.filter((item) => item.selected);
+
+		if (filteredKeys && !filteredKeys.length) filteredKeys = data.keys;
 
 		const transformedData = data.xAxisLabels.map((label, i) => {
 			let obj = { label };
-			data.keys.forEach((key) => {
+			filteredKeys.forEach((key) => {
 				obj[key.name] = key.values[i] ?? 0;
 			});
 			return obj;
 		});
 
-		const keys = data.keys.map((k) => k.name);
-		const colors = data.keys.reduce(
+		const keys = filteredKeys.map((k) => k.name);
+		const colors = filteredKeys.reduce(
 			(acc, k) => ({ ...acc, [k.name]: k.color }),
 			{}
 		);
@@ -79,7 +81,6 @@ const Chart = ({ dataProp }) => {
 			.style('pointer-events', 'none')
 			.style('box-shadow', '4px 4px 10px rgba(0, 0, 0, 0.2)');
 
-		// Draw the stacked bars
 		svg
 			.append('g')
 			.selectAll('g')
@@ -94,7 +95,6 @@ const Chart = ({ dataProp }) => {
 			.attr('height', (d) => y(d[0]) - y(d[1]))
 			.attr('width', x.bandwidth());
 
-		// Draw a transparent overlay for the entire bar
 		svg
 			.selectAll('.bar-overlay')
 			.data(transformedData)
@@ -153,7 +153,6 @@ const Chart = ({ dataProp }) => {
 				tooltip.style('opacity', 0);
 			});
 
-		// X Axis
 		svg
 			.append('g')
 			.attr('transform', `translate(0,${height - margin.bottom})`)
@@ -162,7 +161,6 @@ const Chart = ({ dataProp }) => {
 			.attr('transform', 'rotate(-45)')
 			.style('text-anchor', 'end');
 
-		// Y Axis
 		svg
 			.append('g')
 			.attr('transform', `translate(${margin.left},0)`)

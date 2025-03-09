@@ -17,14 +17,19 @@ p {
 	background-color: white;
 	height: calc(100vh - 100px);
 	display: flex;
-	justify-content: space-around;
+	justify-content: start;
+	// gap: 15%;
 	align-items: center;
+	position: relative;
 
 	.left-panel {
-		width: 20%;
-		height: 90vh;
+		margin: 0 10%;
+		width: 75%;
+		height: fit-content;
+		max-height: 90vh;
 		overflow: scroll;
 		background-color: white;
+		position: relative;
 
 		.left-panel-row {
 			border: 1px dashed #c9c9c9;
@@ -33,6 +38,10 @@ p {
 			display: flex;
 			flex-direction: column;
 			row-gap: 15px;
+
+			&.active {
+				background-color: #cee7fe;
+			}
 
 			.item-name-final {
 				font-size: 14px;
@@ -47,9 +56,55 @@ p {
 
 			.item-name {
 				font-size: 13px;
+				color: #1d6dc3;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
 			}
 		}
 	}
+}
+
+.left-popover {
+	background-color: #cee7fe;
+	color: black;
+	padding: 10px;
+	z-index: 1;
+	width: 75%;
+	position: absolute;
+	left: 85%;
+	max-height: 90vh;
+	overflow: scroll;
+
+	.popover-header {
+		display: flex;
+		justify-content: space-between;
+		font-size: 16px;
+		padding: 10px;
+
+		p {
+			text-overflow: ellipsis;
+			overflow: hidden;
+			font-weight: 600;
+			white-space: nowrap;
+			max-width: 80%;
+		}
+	}
+
+	.popover-item {
+		display: flex;
+		justify-content: space-between;
+		font-size: 14px;
+		padding: 10px;
+	}
+}
+
+.wrapper {
+	display: flex;
+	width: 25%;
+	position: relative;
+	max-width: 80%;
+	justify-content: flex-start;
 }
 
 .tabs {
@@ -62,7 +117,7 @@ p {
 		background: none;
 		border: none;
 		outline: none;
-		color: #1D6DC3;
+		color: #1d6dc3;
 
 		&.active {
 			text-decoration: underline;
@@ -90,4 +145,73 @@ p {
 
 ::-webkit-scrollbar-thumb:hover {
 	background: #555; /* Slightly darker on hover */
+}
+
+.cursor {
+	cursor: pointer;
+}
+
+.clear-selection {
+	position: absolute;
+	top: 5%;
+	right: 5%;
+	outline: none;
+	font-size: 15px;
+	font-weight: 500;
+	border: none;
+	color: #1d6dc3;
+	background: none;
+}
+
+.toggle-buttons {
+	position: absolute;
+	top: 0;
+	display: flex;
+	gap: 10px;
+	right: 5%;
+
+	.toggle-button {
+		background: none;
+		border: 1px solid #1d6dc3;
+		border-radius: 3px;
+		outline: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 30px;
+		width: 30px;
+
+		&.active {
+			background-color: #1d6dc3;
+
+			svg {
+				fill: white;
+			}
+		}
+	}
+}
+
+.graph-table {
+	width: 70%;
+	overflow: scroll;
+
+	table {
+		margin: 0;
+	}
+}
+
+.graph-table th,
+.graph-table td {
+	text-align: left;
+	padding: 8px;
+	font-size: 14px;
+}
+
+.graph-table th {
+	padding: 10px 30px;
+	white-space: nowrap;
+}
+
+.graph-table td {
+	font-size: 13px;
 }

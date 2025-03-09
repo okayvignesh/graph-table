@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import Chart from './Chart';
+import Table from './Table';
 import { data, data1, data2, data3 } from '../data';
+import { MdKeyboardArrowRight } from 'react-icons/md';
+import { PiDotsThreeCircleLight } from 'react-icons/pi';
+import { IoClose } from 'react-icons/io5';
+import { GiNetworkBars } from 'react-icons/gi';
+import { BsList } from 'react-icons/bs';
 
 function Main() {
 	const [selectedTab, setSelectedTab] = useState('data1');
 	const [currentData, setCurrentData] = useState(data1);
 	const [totalValue, setTotalValue] = useState(0);
+	const [popOverData, setpopOverData] = useState(null);
+	const [viewMode, setViewMode] = useState('chart');
 
 	useEffect(() => {
 		calculateTotalValues(currentData);
@@ -43,6 +51,47 @@ function Main() {
 		setCurrentData(dataSets[tab] || data1);
 	};
 
+	const handleSelect = (item) => {
+		setCurrentData({
+			...currentData,
+			keys: currentData.keys.map((key) =>
+				key.name === item.name ? { ...key, selected: !key.selected } : key
+			),
+		});
+	};
+
+	const handlePopOverData = (item) => {
+		if (popOverData && popOverData.name === item.name) {
+			setpopOverData(null);
+			return;
+		}
+		let popOverObj = {
+			name: item.name,
+			total: 0,
+			items: [],
+		};
+		currentData.xAxisLabels.forEach((label, index) => {
+			const newItem = { [label]: item.values[index] };
+			popOverObj.items.push(newItem);
+			popOverObj.total += item.values[index];
+		});
+		setpopOverData(popOverObj);
+	};
+
+	const clearPopOverData = () => {
+		setpopOverData(null);
+	};
+
+	const clearSelections = () => {
+		setCurrentData({
+			...currentData,
+			keys: currentData.keys.map((key) => ({
+				...key,
+				selected: false,
+			})),
+		});
+	};
+
 	return (
 		<>
 			{/* Tabs */}
@@ -70,29 +119,89 @@ function Main() {
 			</div>
 			<div className="main-container">
 				{/* Left Panel */}
-				<div className="left-panel">
-					<div className="left-panel-row">
-						<p className="item-name-final">Total </p>
-						<p>{totalValue}</p>
-					</div>
-					{currentData.keys.map((key) => (
-						<div className="left-panel-row" key={key.name}>
-							<div className="d-flex align-items-center column-gap-2">
-								<div
-									className="color-box"
-									style={{ backgroundColor: key.color }}></div>
-								<p className="item-name">{key.name}</p>
-							</div>
-							<div className="d-flex justify-content-between align-items-center">
-								<p>{getTotalValue(key.values)}</p>
-								<p>{calculatePercentage(key.values, 1000000)} %</p>
-							</div>
+				<div className="wrapper">
+					<div className="left-panel">
+						<div className="left-panel-row">
+							<p className="item-name-final">Total </p>
+							<p>{totalValue}</p>
 						</div>
-					))}
+						{currentData.keys.map((key) => (
+							<div
+								className={`left-panel-row ${key.selected ? 'active' : ''}`}
+								key={key.name}>
+								<div className="d-flex align-items-center justify-content-between">
+									<div className="d-flex align-items-center column-gap-2">
+										<div
+											className="color-box"
+											style={{ backgroundColor: key.color }}></div>
+										<p className="item-name" onClick={() => handleSelect(key)}>
+											{key.name}
+											<MdKeyboardArrowRight size={20} />
+										</p>
+									</div>
+									<PiDotsThreeCircleLight
+										color="#1d6dc3"
+										size={20}
+										className="cursor"
+										onClick={() => handlePopOverData(key)}
+									/>
+								</div>
+								<div className="d-flex justify-content-between align-items-center">
+									<p>{getTotalValue(key.values)}</p>
+									<p>{calculatePercentage(key.values, 1000000)} %</p>
+								</div>
+							</div>
+						))}
+					</div>
+					{popOverData && (
+						<div className="left-popover">
+							<div className="d-flex justify-content-end">
+								<IoClose
+									onClick={() => clearPopOverData()}
+									className="cursor"
+								/>
+							</div>
+							<div className="popover-header">
+								<p>{popOverData.name}</p>
+								<p>{popOverData.total}</p>
+							</div>
+							<hr />
+							{popOverData.items &&
+								popOverData.items.map((item, index) => {
+									return Object.entries(item).map(([key, value], subIndex) => (
+										<div className="popover-item" key={`${index}-${subIndex}`}>
+											<p>{key}</p>
+											<p>{value}</p>
+										</div>
+									));
+								})}
+						</div>
+					)}
 				</div>
 
-				{/* Chart Component */}
-				<Chart dataProp={currentData} />
+				<button className="clear-selection" onClick={() => clearSelections()}>
+					Clear selections
+				</button>
+
+				<div className="toggle-buttons">
+					<button
+						className={`toggle-button ${viewMode === 'chart' ? 'active' : ''}`}
+						onClick={() => setViewMode('chart')}>
+						<GiNetworkBars color="#1d6dc3" size={18} />
+					</button>
+					<button
+						className={`toggle-button ${viewMode === 'list' ? 'active' : ''}`}
+						onClick={() => setViewMode('list')}>
+						<BsList color="#1d6dc3" size={18} />
+					</button>
+				</div>
+
+				{/* Chart Component / Table component */}
+				{viewMode == 'chart' ? (
+					<Chart dataProp={currentData} />
+				) : (
+					<Table products={currentData.xAxisLabels} keys={currentData.keys} />
+				)}
 			</div>
 		</>
 	);
